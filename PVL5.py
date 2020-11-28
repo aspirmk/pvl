@@ -4,8 +4,14 @@
 Руководящими указаниями по релейной защите № 11 Расчеты токов короткого
 замыкания для релейной защиты и системной автоматики 110-750 кВ
 
-г.Саратов 24.11.2020г.
+г.Саратов 28.11.2020г.
 
+
+История изменений
+
+28.11.2020
+1. Скорректирован конструктор класса Line в части добавления параметра q=(q1,q2),
+   предназначенного для указания узлов МРТКЗ к которым будет подключена результирующая ветвь
 """
 
 import numpy as np
@@ -37,7 +43,7 @@ class opora:
     def AddHeight(self,name,DY):
         '''Объект опоры созданный с помощью конструктора может выступать
         в качестве родительского объекта для объекта опоры координаты подвеса
-        проводов и тросов которого смещены вверх на величину DY, м.
+        проводов и тросов которого смещены вверх на величину ВН, м.
         Результатом метода op.AddHeight(DY) является новый объект класса opora'''
         if self.Parent is None:
             res = opora.__new__(opora)
@@ -168,7 +174,7 @@ class izol:
 class Line:
     '''Класс представляющий трехфазную линию или трос в пределах одного сечения'''
 
-    def __init__(self,sech,name,KOP,OpC,Pr,Iz,RZT=0,fpr=0):#,q1=None,q2=None
+    def __init__(self,sech,name,KOP,OpC,Pr,Iz,RZT=0,fpr=0,q=(0,0)):
         '''Конструктор объекта трехфазной линии или троса в пределах одного сечения
         sech - Ссылка на сечение в которое добавляется трехфазная линия/трос
         name - Наименование трехфазной линии или троса
@@ -181,7 +187,8 @@ class Line:
             0 - трос выступает как отдельная ВЛ
             1 - трос заземлен с одной стороны (влияет только на B0)
             2 - трос заземлен с двух сторон (влияет на Z0 и B0)
-        fpr - Стрела провеса провода/троса, м'''
+        fpr - Стрела провеса провода/троса, м
+        q=(None,None) - ссылки на узлы МРТКЗ к которым будет подключена ветвь'''
         self.sech = sech# Ссылка на сечение
         self.name = name# Название ВЛ/троса
         self.q1 = None# Узел №1 к которому подключена ВЛ
@@ -191,6 +198,8 @@ class Line:
         self.pr_tr=len(OpC)# pr_tr=3 - трехфазная ВЛ, pr_tr=1 - грозозащитный трос
         self.Pr = Pr# Ссылка на Тип провода ВЛ/троса
         self.Iz = Iz# Ссылка на Тип изолятора в гирлянде подвеса провода ВЛ/троса
+        self.q1 = q[0]# Ссылка на узел q1 МРТКЗ к которому будет подключена ветвь
+        self.q2 = q[1]# Ссылка на узел q2 МРТКЗ к которому будет подключена ветвь
 
         #Длина гирлянды изоляторов
         if isinstance(Iz, izol):
@@ -270,11 +279,6 @@ class Line:
                 app = C_1_2pie0 * np.log(spp/dpp)
         return app
 
-    def ConnectTo(self,q1,q2):
-        '''Метод для задания узлов МРТКЗ к которым будет подключаться данная ветвь'''
-        self.q1 = q1
-        self.q2 = q2
-
     def __repr__(self):
         '''Вывод на экран параметров трехфазной линии или троса'''
         str1 = 'Линия/трос {} из сечения {}, KOP={}, XYоп = {};'.format(self.name,self.sech.name,self.KOP,self.OpC)
@@ -290,16 +294,16 @@ class Line:
         для получения B0 - lk.B0'''
         if self.RZT == 0:
             if attrname in ('Z1', 'z1'):
-                attrval = self.sech.Len * self.sech.Z1[self.Id-1,0]
+                attrval = self.sech.Z1[self.Id-1,0]
             elif attrname in ('Z0', 'z0'):
-                attrval = self.sech.Len * self.sech.Z0[self.Id-1,self.Id-1]
+                attrval = self.sech.Z0[self.Id-1,self.Id-1]
             elif attrname in ('B1', 'b1'):
-                attrval = self.sech.Len * self.sech.B1[self.Id-1,0]
+                attrval = self.sech.B1[self.Id-1,0]
             elif attrname in ('B0', 'b0'):
-                attrval = self.sech.Len * self.sech.B0[self.Id-1,self.Id-1]
+                attrval = self.sech.B0[self.Id-1,self.Id-1]
             else:
                 return
-            return attrval
+            return self.sech.Len * attrval
         return
 
 
