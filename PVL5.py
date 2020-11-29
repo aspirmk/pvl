@@ -388,13 +388,17 @@ class sech:
         print('|   |                     |        |        |        |        |      |')
         print('| № |      Название       |   R1   |   X1   |   Z1   |   B1   |  fi  |')
         print('|___|_____________________|________|________|________|________|______|')
+        z1 = self.Len * self.Z1
+        z0 = self.Len * self.Z0
+        b1 = self.Len * self.B1
+        b0 = self.Len * self.B0
         for ij,pk in enumerate(self.bp):
-            z = pk.Z1
+            z = z1[ij,0]
             R = np.real(z)
             X = np.imag(z)
             Z = np.abs(z)
             fi = 180/np.pi*np.angle(z)
-            B = 1e6*np.imag(pk.B1)
+            B = 1e6*np.imag(b1[ij,0])
             print('|   |                     |        |        |        |        |      |')
             print('|{0:^3}|{1:^21s}|{2:^8.4f}|{3:^8.4f}|{4:^8.4f}|{5:^8.4f}|{6:^6.1f}|'.format(ij+1, pk.name,R,X,Z,B,fi))
         print('|___|_____________________|________|________|________|________|______|')
@@ -405,24 +409,23 @@ class sech:
         print('| № |      Название       |   R0   |   X0   |   Z0   |   B0   |  fi  |')
         print('|___|_____________________|________|________|________|________|______|')
         for ij,pk in enumerate(self.bp):
-            z = pk.Z0
+            z = z0[ij,ij]
             R = np.real(z)
             X = np.imag(z)
             Z = np.abs(z)
             fi = 180/np.pi*np.angle(z)
-            B = 1e6*np.imag(pk.B0)
+            B = 1e6*np.imag(b0[ij,ij])
             print('|   |                     |        |        |        |        |      |')
             print('|{0:^3}|{1:^21s}|{2:^8.4f}|{3:^8.4f}|{4:^8.4f}|{5:^8.4f}|{6:^6.1f}|'.format(ij+1, pk.name,R,X,Z,B,fi))
             for pk2 in self.bp[ij+1:]:
                 ij2 = pk2.Id-1
-                z = self.Len*self.Z0[ij,ij2]
+                z = z0[ij,ij2]
                 R = np.real(z)
                 X = np.imag(z)
                 Z = np.abs(z)
                 fi = 180/np.pi*np.angle(z)
-                B = self.Len*1e6*np.imag(self.B0[ij,ij2])
+                B = 1e6*np.imag(b0[ij,ij2])
 #                print('|{0:^3s}|{1:^21s}|{2:^8.4f}|{3:^8.4f}|{4:^8.4f}|{5:^8.4f}|{6:^6.1f}|'.format('   ', pk2.name,R,X,Z,B,fi))
                 print('|/{0:^2}|{1:^21s}|{2:^8.4f}|{3:^8.4f}|{4:^8.4f}|{5:^8.4f}|{6:^6.1f}|'.format(ij2+1, pk2.name,R,X,Z,B,fi))
-
         print('|___|_____________________|________|________|________|________|______|')
         print()
