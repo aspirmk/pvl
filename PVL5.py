@@ -343,8 +343,16 @@ class sech:
                 self.Z0[ij,ij2]=M0
                 self.Z0[ij2,ij]=M0
                 aM = pk.App(pk2)
-                A0[ij,ij2]=aM
-                A0[ij2,ij]=aM
+                if pk.pr_tr != pk2.pr_tr:
+                    if pk.pr_tr == 3:
+                        A0[ij,ij2] = aM
+                        A0[ij2,ij] = 3*aM
+                    else:
+                        A0[ij,ij2] = 3*aM
+                        A0[ij2,ij] = aM
+                else:
+                    A0[ij,ij2] = aM
+                    A0[ij2,ij] = aM
         self.nt=len(self.bt)
         if self.nt>0:
             Ztt=np.zeros((self.nt,self.nt),dtype=np.cdouble)
